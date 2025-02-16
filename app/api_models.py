@@ -1,17 +1,106 @@
-from pydantic import BaseModel, constr
-from typing import Literal
-from datetime import datetime
+"""
+schemas.py
 
-class TaskCreateDTO(BaseModel):
-    title: constr(min_length=1, max_length=100)
-    description: constr(min_length=1, max_length=500)
-    due_date: datetime
-    status: Literal['pending', 'in_progress', 'completed']
+This module defines the Pydantic data models (schemas) for task management.
 
-class TaskResponseDTO(TaskCreateDTO):
-    id: int
-    creation_date: datetime
+These schemas are used for:
+- Validating incoming data for task creation and updates
+- Serializing task data for responses
+- Ensuring consistent data structures throughout the application
+
+Includes:
+- TaskBaseDTO: Common fields for tasks
+- TaskCreateDTO: Used when creating a new task
+- TaskResponseDTO: Extends TaskBaseDTO for responses, adding ID and creation date
+"""
+
+from pydantic import BaseModel, Field, model_validator
+from datetime import datetime, timezone
+from typing import Literal, Annotated
+
+class TaskBaseDTO(BaseModel):
+    """
+    Base Data Transfer Object for tasks, containing the common attributes.
+    Attributes:
+        title (str): The task title, constrained to 1-100 characters.
+        description (str): A detailed description, limited to 500 characters.
+        due_date (datetime): The due date for task completion, expected as a valid ISO8601 datetime string with timezone awareness.
+        status (Literal): The current status of the task ('pending', 'in_progress', 'completed').
+    """
+    title: Annotated[
+        str,
+        Field(
+            ..., min_length=1, max_length=100,
+            description="The title of the task. Must be between 1 and 100 characters."
+        )
+    ]
+    description: Annotated[
+        str,
+        Field(
+            ..., min_length=1, max_length=500,
+            description="A detailed description of the task, limited to 500 characters."
+        )
+    ]
+    due_date: Annotated[
+        datetime,
+        Field(
+            ..., description="The due date by which the task should be completed. Must be a valid ISO8601 datetime string with timezone."
+        )
+    ]
+    status: Annotated[
+        Literal['pending', 'in_progress', 'completed'],
+        Field(
+            ..., description="The current status of the task. Options: 'pending', 'in_progress', 'completed'."
+        )
+    ]
+
+    @model_validator(mode="before")
+    def check_due_date_is_future(self, values):
+        """
+        Model validator to ensure the due_date is set in the future.
+
+        Args:
+            values (dict): A dictionary of the field values.
+
+        Raises:
+            ValueError: If due_date is not in the future.
+
+        Returns:
+            dict: The validated attributes of the model.
+        """
+        due_date = values.get('due_date')
+        if due_date is not None and due_date <= datetime.now(timezone.utc):
+            raise ValueError('The due_date must be in the future.')
+        return values
+
+class TaskCreateDTO(TaskBaseDTO):
+    """
+    Data Transfer Object for creating a new task.
+
+    Inherits all fields from TaskBaseDTO. Used specifically for validating data when a user creates a new task.
+    """
+    pass
+
+class TaskResponseDTO(TaskBaseDTO):
+    """
+    Response Data Transfer Object for task information.
+
+    Extends TaskBaseDTO by adding:
+        id (int): A unique identifier for the task.
+        creation_date (datetime): Timestamp of when the task was created.
+
+    This model is used for sending task information back to clients.
+    """
+    id: int = Field(..., description="The unique identifier of the task.")
+    creation_date: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp indicating when the task was created."
+    )
 
     class Config:
+        """
+        Configuration for Pydantic model.
+
+        Enables ORM mode to allow the model to read data from ORM models directly.
+        """
         orm_mode = True
-        from_attributes = True
