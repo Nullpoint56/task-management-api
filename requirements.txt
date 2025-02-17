@@ -5,3 +5,5 @@ pydantic
 pytz
 pytest
 httpx
+fastapi-cache2
+redis
