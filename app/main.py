@@ -11,22 +11,31 @@ Tasks:
 
 Upon execution, this script initializes the database schema and applies all included routers and middleware.
 """
-
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
-from contextlib import asynccontextmanager
-from .routers import tasks
-from app.dependencies.database import engine
-from .db_schemas import Base
 
-# Initialize database tables
-Base.metadata.create_all(bind=engine)
+from .routers import tasks
+from app.dependencies.database import get_db
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize In-Memory Cache
+    """
+    Async context manager to handle startup and shutdown events.
+    """
+    # Initialize database schema
+    get_db()
+
+    # Initialize in-memory cache
     FastAPICache.init(InMemoryBackend(), prefix="api-cache")
+
     yield
+
+    # Cleanup logic if needed (currently no cleanup in this example)
+
 app = FastAPI(lifespan=lifespan)
 app.include_router(tasks.router)

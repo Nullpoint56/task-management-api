@@ -54,25 +54,6 @@ class TaskBaseDTO(BaseModel):
         )
     ]
 
-    @model_validator(mode="before")
-    def check_due_date_is_future(self, values):
-        """
-        Model validator to ensure the due_date is set in the future.
-
-        Args:
-            values (dict): A dictionary of the field values.
-
-        Raises:
-            ValueError: If due_date is not in the future.
-
-        Returns:
-            dict: The validated attributes of the model.
-        """
-        due_date = values.get('due_date')
-        if due_date is not None and due_date <= datetime.now(timezone.utc):
-            raise ValueError('The due_date must be in the future.')
-        return values
-
 class TaskCreateDTO(TaskBaseDTO):
     """
     Data Transfer Object for creating a new task.
@@ -103,4 +84,4 @@ class TaskResponseDTO(TaskBaseDTO):
 
         Enables ORM mode to allow the model to read data from ORM models directly.
         """
-        orm_mode = True
+        from_attributes = True  # Replace `orm_mode` with `from_attributes`
