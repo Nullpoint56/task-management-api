@@ -1,5 +1,3 @@
-import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -8,7 +6,6 @@ from typing import List, Optional
 from ..api_models import TaskCreateDTO, TaskResponseDTO
 from ..db_schemas import TaskDBSchema
 from app.dependencies.database import get_db
-from ..services.smart_task_suggestion import get_semantically_similar_tasks
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -77,7 +74,7 @@ async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
 @router.get("/suggestions/", response_model=None)
-async def smart_task_suggestions(db: AsyncSession = Depends(get_db)):
+async def smart_task_suggestions():
     raise HTTPException(
         status_code=501,
         detail="The 'smart_task_suggestions' endpoint is not yet implemented. Please check the documentation for updates.",

@@ -14,7 +14,7 @@ Includes:
 - TaskResponseDTO: Extends TaskBaseDTO for responses, adding ID and creation date
 """
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 from typing import Literal, Annotated
 

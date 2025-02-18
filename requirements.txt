@@ -1,9 +1,9 @@
-fastapi
+fastapi~=0.115.8
 uvicorn
-sqlalchemy
-pydantic
+sqlalchemy~=2.0.38
+pydantic~=2.10.6
 pytz
 pytest
 httpx
-fastapi-cache2
 aiosqlite
+scikit-learn~=1.6.1
