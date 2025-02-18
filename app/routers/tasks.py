@@ -76,14 +76,10 @@ async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
     await db.delete(task)
     await db.commit()
 
-@router.get("/suggestions/")
+@router.get("/suggestions/", response_model=None)
 async def smart_task_suggestions(db: AsyncSession = Depends(get_db)):
-    text_similarity_threshold = 0.5
-    top_k_clusters = 5
-    time_similarity_threshold = datetime.timedelta(days=1)
-    suggested_task_amount = 5
-    tasks = await db.execute(select(TaskDBSchema))
-    semantically_similar_tasks = get_semantically_similar_tasks(tasks, text_similarity_threshold, top_k_clusters)
-    completion_time_similar_tasks = get_completion_time_similar_tasks(tasks, time_similarity_threshold, top_k_clusters)
-    suggested_tasks = generate_new_tasks(semantically_similar_tasks, completion_time_similar_tasks, suggested_task_amount)
-    return suggested_tasks
+    raise HTTPException(
+        status_code=501,
+        detail="The 'smart_task_suggestions' endpoint is not yet implemented. Please check the documentation for updates.",
+        headers={"X-Error": "Endpoint not implemented yet"},
+    )
