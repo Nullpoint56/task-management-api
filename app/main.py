@@ -14,8 +14,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from .routers import tasks
-from app.dependencies.database import get_db
-
+from app.dependencies.database import init_db
 
 
 @asynccontextmanager
@@ -24,7 +23,7 @@ async def lifespan(application: FastAPI):
     Async context manager to handle startup and shutdown events.
     """
     # Initialize database schema
-    get_db()
+    await init_db()
 
     yield
 
